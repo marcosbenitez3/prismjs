@@ -1631,7 +1631,7 @@ Prism.languages.rss = Prism.languages.xml;
 			// _em_
 
 			// allow one nested instance of bold text using the same delimiter
-			pattern: createInline(/\b_(?:(?!_)<inner>|__(?:(?!_)<inner>)+__)+_\b|\*(?:(?!\*)<inner>|\*\*(?:(?!\*)<inner>)+\*\*)+\*/.source),
+			pattern: createInline(/\*(?:(?!\*)<inner>|\*\*(?:(?!\*)<inner>)+\*\*)+\*/.source),
 			lookbehind: true,
 			greedy: true,
 			inside: {
@@ -1641,6 +1641,23 @@ Prism.languages.rss = Prism.languages.xml;
 					inside: {} // see below
 				},
 				'punctuation': /[*]/
+			}
+		},
+		'underline': {
+			// *em*
+			// _em_
+
+			// allow one nested instance of bold text using the same delimiter
+			pattern: createInline(/\b_(?:(?!_)<inner>|__(?:(?!_)<inner>)+__)+_\b/.source),
+			lookbehind: true,
+			greedy: true,
+			inside: {
+				'content': {
+					pattern: /(^.)[\s\S]+(?=.$)/,
+					lookbehind: true,
+					inside: {} // see below
+				},
+				'punctuation': /[_]/
 			}
 		},
 		'strike': {
@@ -1697,8 +1714,8 @@ Prism.languages.rss = Prism.languages.xml;
 		}
 	});
 
-	['url', 'bold', 'italic', 'strike'].forEach(function (token) {
-		['url', 'bold', 'italic', 'strike', 'code-snippet'].forEach(function (inside) {
+	['url', 'bold', 'italic', 'strike', 'underline'].forEach(function (token) {
+		['url', 'bold', 'italic', 'strike', 'code-snippet', 'underline'].forEach(function (inside) {
 			if (token !== inside) {
 				Prism.languages.markdown[token].inside.content.inside[inside] = Prism.languages.markdown[inside];
 			}
