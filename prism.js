@@ -1470,6 +1470,10 @@ Prism.languages.rss = Prism.languages.xml;
 	var tableRow = /\|?__(?:\|__)+\|?(?:(?:\n|\r\n?)|(?![\s\S]))/.source.replace(/__/g, function () { return tableCell; });
 	var tableLine = /\|?[ \t]*:?-{3,}:?[ \t]*(?:\|[ \t]*:?-{3,}:?[ \t]*)+\|?(?:\n|\r\n?)/.source;
 
+	var character = /\n[A-Z]+\n(?!\n)/;
+	var parenthetical = /\([^\)]*\)/;
+	var dialog = /__(?!__)[^\n]+\n/.source.replace(/__/g, function () { return character }).replace(/##/g, function () { return parenthetical });
+
 
 	Prism.languages.markdown = Prism.languages.extend('markup', {});
 	Prism.languages.insertBefore('markdown', 'prolog', {
@@ -1486,11 +1490,11 @@ Prism.languages.rss = Prism.languages.xml;
 				}
 			}
 		},
-		'blockquote': {
-			// > ...
-			pattern: /^>(?:[\t ]*>)*/m,
-			alias: 'punctuation'
-		},
+		// 'blockquote': {
+		// 	// > ...
+		// 	pattern: /^>(?:[\t ]*>)*/m,
+		// 	alias: 'punctuation'
+		// },
 		'table': {
 			pattern: RegExp('^' + tableRow + tableLine + '(?:' + tableRow + ')*', 'm'),
 			inside: {
@@ -1551,30 +1555,30 @@ Prism.languages.rss = Prism.languages.xml;
 				}
 			}
 		],
-		'title': [
-			{
-				// title 1
-				// =======
+		// 'title': [
+		// 	{
+		// 		// title 1
+		// 		// =======
 
-				// title 2
-				// -------
-				pattern: /\S.*(?:\n|\r\n?)(?:==+|--+)(?=[ \t]*$)/m,
-				alias: 'important',
-				inside: {
-					punctuation: /==+$|--+$/
-				}
-			},
-			{
-				// # title 1
-				// ###### title 6
-				pattern: /(^\s*)#.+/m,
-				lookbehind: true,
-				alias: 'important',
-				inside: {
-					punctuation: /^#+|#+$/
-				}
-			}
-		],
+		// 		// title 2
+		// 		// -------
+		// 		pattern: /\S.*(?:\n|\r\n?)(?:==+|--+)(?=[ \t]*$)/m,
+		// 		alias: 'important',
+		// 		inside: {
+		// 			punctuation: /==+$|--+$/
+		// 		}
+		// 	},
+		// 	{
+		// 		// # title 1
+		// 		// ###### title 6
+		// 		pattern: /(^\s*)#.+/m,
+		// 		lookbehind: true,
+		// 		alias: 'important',
+		// 		inside: {
+		// 			punctuation: /^#+|#+$/
+		// 		}
+		// 	}
+		// ],
 		'hr': {
 			// ***
 			// ---
@@ -1626,6 +1630,19 @@ Prism.languages.rss = Prism.languages.xml;
 				'punctuation': /\*\*|__/
 			}
 		},
+		'boneyard': {
+			pattern: /\/\*[(?!\/*)[^\n]+\/\*/,
+			lookbehind: true,
+			greedy: true,
+			inside: {
+				'content': {
+					pattern: /(^..)[\s\S]+(?=..$)/,
+					lookbehind: true,
+					inside: {} // see below
+				},
+				'punctuation': /\/\*|\*\//
+			}
+		},
 		'italic': {
 			// *em*
 			// _em_
@@ -1644,10 +1661,6 @@ Prism.languages.rss = Prism.languages.xml;
 			}
 		},
 		'underline': {
-			// *em*
-			// _em_
-
-			// allow one nested instance of bold text using the same delimiter
 			pattern: createInline(/\b_(?:(?!_)<inner>|__(?:(?!_)<inner>)+__)+_\b/.source),
 			lookbehind: true,
 			greedy: true,
@@ -1657,7 +1670,97 @@ Prism.languages.rss = Prism.languages.xml;
 					lookbehind: true,
 					inside: {} // see below
 				},
-				'punctuation': /[_]/
+				// 'punctuation': /[_]/
+			}
+		},
+		'parenthetical': {
+			pattern: parenthetical,
+			lookbehind: true,
+			greedy: true,
+			inside: {
+				'content': {
+					pattern: /(^.)[\s\S]+(?=.$)/,
+					lookbehind: true,
+					inside: {} // see below
+				},
+				'punctuation': /[()]/
+			}
+		},
+		'centered-text': {
+			pattern: />[^<]*</,
+			lookbehind: true,
+			greedy: true,
+			inside: {
+				'content': {
+					pattern: /(^.)[\s\S]+(?=.$)/,
+					lookbehind: true,
+					inside: {} // see below
+				},
+				'punctuation': /[<>]/
+			}
+		},
+		// 'dialog': {
+		// 	// *em*
+		// 	// _em_
+
+		// 	// allow one nested instance of bold text using the same delimiter
+		// 	pattern: dialog,
+		// 	lookbehind: true,
+		// 	greedy: true,
+		// },
+		'character': {
+			// allow one nested instance of bold text using the same delimiter
+			pattern: /\n[A-Z]+\n(?!\n)/,
+			lookbehind: true,
+			greedy: true,
+			// inside: {
+			// 	'content': {
+			// 		pattern: /(^.)[\s\S]+(?=.$)/,
+			// 		lookbehind: true,
+			// 		inside: {} // see below
+			// 	},
+			// 	'punctuation': /[]/
+			// }
+		},
+		'transition': {
+			pattern: /\n[A-Z\s]+TO:\n\n/,
+			lookbehind: true,
+			greedy: true,
+		},
+		'section': {
+			pattern: /#{1,6}\s[^\n]+/,
+			lookbehind: true,
+			greedy: true,
+		},
+		'synopse': {
+			pattern: /=\s[^\n]+/,
+			lookbehind: true,
+			greedy: true,
+		},
+		'notes': {
+			pattern: /\[\[(?!\]\])[^\n]+\]\]/,
+			lookbehind: true,
+			greedy: true,
+			inside: {
+				'content': {
+					pattern: /(^..)[\s\S]+(?=..$)/,
+					lookbehind: true,
+					inside: {} // see below
+				},
+				'punctuation': /\[\[|\]\]/
+			}
+		},
+		'scene-heading': {
+			pattern: /INT./,
+			lookbehind: true,
+			greedy: true,
+			inside: {
+				'content': {
+					pattern: /(^.)[\s\S]+(?=.$)/,
+					lookbehind: true,
+					inside: {} // see below
+				},
+				// 'punctuation': /INT./
 			}
 		},
 		'strike': {
